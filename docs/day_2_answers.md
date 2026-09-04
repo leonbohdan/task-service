@@ -1,0 +1,199 @@
+# 🎯 Відповіді на питання для самоперевірки та співбесіди (День 2)
+
+Цей документ містить детальні розбори питань із життєвого циклу запиту в NestJS (Request Lifecycle), валідації, безпеки, перехоплювачів та декораторів із [day_2.md](file:///home/bohdan/MyProjects/test_projects/task-service/day_2.md).
+
+---
+
+## 1. Життєвий цикл запиту в NestJS: Який точний порядок виконання між `Middleware`, `Guards`, `Interceptors`, `Pipes` та `Filters`?
+
+### 📌 Коротке резюме
+Коли запит надходить до додатку NestJS, він проходить суворий ланцюжок компонентів у такому порядку:
+
+$$\mathbf{Middleware} \longrightarrow \mathbf{Guards} \longrightarrow \mathbf{Interceptors\ (до)} \longrightarrow \mathbf{Pipes} \longrightarrow \mathbf{Controller/Service} \longrightarrow \mathbf{Interceptors\ (після)} \longrightarrow \mathbf{Filters\ (у\ разі\ помилки)}$$
+
+---
+
+### 🔍 Детальний розбір життєвого циклу
+
+```
+ Вхідний HTTP-запит
+        │
+        ▼
+1. [Middleware] (Global -> Module)
+        │
+        ▼
+2. [Guards] (Global -> Controller -> Route)
+        │ ──(Якщо false)──► [Exception Filter] ──► 403 Forbidden
+        ▼
+3. [Interceptors - Pre-controller] (Global -> Controller -> Route)
+        │
+        ▼
+4. [Pipes] (Global -> Controller -> Route -> Param)
+        │ ──(Якщо валідація провалена)──► [Exception Filter] ──► 400 Bad Request
+        ▼
+5. [Controller Method (Route Handler)]
+        │
+        ▼
+6. [Service / Database Calls]
+        │
+        ▼
+7. [Interceptors - Post-controller / RxJS stream] (Route -> Controller -> Global)
+        │
+        ▼
+8. [Exception Filters] (Якщо будь-де виник виняток)
+        │
+        ▼
+ Вихідна HTTP-відповідь клієнту
+```
+
+#### Порядок рівнів застосування (Scope Hierarchy):
+Для кожного компонента існує три рівні прив'язки:
+1. **Global** (глобальний — `app.useGlobalGuards(...)`)
+2. **Controller** (на рівні контролера — `@UseGuards(...)` над класом)
+3. **Route / Method** (на рівні методу — `@UseGuards(...)` над методом)
+
+* **На шляху «туди» (Inbound):** виконання завжди йде від **Global $\to$ Controller $\to$ Route**.
+* **Для Pipes:** додатково останнім викликається **Route Parameter Pipe** (наприклад, `@Param('id', ParseUUIDPipe)`).
+* **На шляху «назад» (Outbound для Interceptors):** завдяки RxJS-потокам обробка повернення йде у зворотному порядку: **Route $\to$ Controller $\to$ Global**.
+
+---
+
+## 2. Interceptors vs Middleware: Коли варто обрати Interceptor, а коли звичайний Express/Nest Middleware?
+
+### 📌 Коротке резюме
+* **Middleware** працює на низькому рівні HTTP-сервера (Express/Fastify) **до** того, як NestJS визначить конкретний маршрут і контролер.
+* **Interceptor** побудований на парадигмі **AOP (Aspect-Oriented Programming)**, працює безпосередньо навколо виконання методу контролера та має повний доступ до контексту NestJS (`ExecutionContext`).
+
+---
+
+### 🔍 Порівняльна таблиця
+
+| Критерій | Middleware | Interceptor |
+| :--- | :--- | :--- |
+| **Рівень виконання** | До роутингу NestJS (Express/Fastify) | Навколо методу контролера (NestJS Context) |
+| **Доступ до `ExecutionContext`** | ❌ Немає (лише сирі `req, res, next`) | ✅ Повний (клас, назва методу, метадані) |
+| **Двонаправленість (Around)** | ⚠️ Складно (потрібно слухати `res.on('finish')`) | ✅ Нативно через RxJS оператори (`tap`, `map`) |
+| **Dependency Injection** | Обмежений (тільки через модуль) | Повноцінний DI контейнер NestJS |
+| **Трансформація відповіді** | ❌ Незручно/небезпечно | ✅ Ідеально (мапінг результату методу) |
+| **Доступ до метаданих (`Reflector`)**| ❌ Немає | ✅ Є (`reflector.get(...)`) |
+
+---
+
+### 💡 Коли що обирати?
+
+#### Обирайте **Middleware**, коли:
+1. Потрібно виконати класичні низькорівневі задачі веб-сервера (наприклад: `cors`, `helmet`, `compression`, парсинг cookies чи сесій).
+2. Потрібно виконати дію **до** того, як взагалі буде задіяно роутинг NestJS (наприклад, перевірка блокування IP-адрес або перевірка розміру тіла запиту).
+3. Використовуються готові сторонні Express-пакети.
+
+#### Обирайте **Interceptor**, коли:
+1. **Трансформація відповіді (Response Transformation):** Обернути результат виконання у стандартизований формат:
+   ```typescript
+   return next.handle().pipe(map((data) => ({ success: true, data, timestamp: new Date() })));
+   ```
+2. **Логування та профілювання (Timing/Profiling):** Виміряти точний час виконання методу контролера:
+   ```typescript
+   const now = Date.now();
+   return next.handle().pipe(tap(() => console.log(`Execution time: ${Date.now() - now}ms`)));
+   ```
+3. **Кешування:** Перевірити наявність результату в кеші (Redis/RAM) і повернути значення з кешу через `of(cachedResult)`, взагалі не викликаючи контролер.
+4. **Обробка винятків / таймаутів:** Застосувати RxJS-оператори на кшталт `timeout(5000)` або `catchError(...)`.
+5. **Робота з декораторами:** Потрібно прочитати кастомні метадані ендпоінта через `Reflector` (наприклад, `@AuditLog('CREATE_ORDER')`).
+
+---
+
+## 3. Pipes: Що насправді робить прапорець `transform: true` у `ValidationPipe`?
+
+### 📌 Коротке резюме
+За замовчуванням об'єкт `req.body` в JavaScript — це **звичайний сирий об'єкт** (`Object`), навіть якщо ви типізували його як `dto: CreateOrderDto`. Прапорець `transform: true` змушує `ValidationPipe`:
+1. Перетворити сирий об'єкт на **справжній екземпляр класу DTO** через `class-transformer` (`plainToInstance`).
+2. Виконати **автоматичне приведення типів** для примітивів (`string` $\to$ `number`, `boolean`).
+
+---
+
+### 🔍 Детальний розгляд трьох дій `transform: true`
+
+#### 1. Створення реального екземпляра класу (Instantiation)
+Без `transform: true`:
+```typescript
+@Post()
+createOrder(@Body() dto: CreateOrderDto) {
+  console.log(dto instanceof CreateOrderDto); // ❌ false! Це просто plain object
+  dto.calculateTotal(); // ❌ TypeError: dto.calculateTotal is not a function
+}
+```
+
+З `transform: true`:
+```typescript
+app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
+@Post()
+createOrder(@Body() dto: CreateOrderDto) {
+  console.log(dto instanceof CreateOrderDto); // ✅ true!
+  dto.calculateTotal(); // ✅ Успішно викликається метод класу або гетер
+}
+```
+
+#### 2. Автоматичне приведення примітивних типів (Primitive Coercion)
+Усі параметри з URL (`@Query()`, `@Param()`) надходять у контролер як рядки (`string`):
+* `GET /orders?page=2&limit=20&isActive=true`
+
+Без `transform: true`:
+* `typeof page === 'string'` (значення `'2'`). Додавання `page + 1` дасть рядок `'21'`.
+
+З `transform: true`:
+```typescript
+@Get()
+findAll(
+  @Query('page') page: number,      // ✅ перетвориться на число 2
+  @Query('isActive') isActive: boolean // ✅ перетвориться на булеве true
+) { ... }
+```
+
+#### 3. Активація декораторів `@Transform()`
+Дозволяє запускати кастомну трансформацію полів на базі `class-transformer`:
+```typescript
+export class FilterDto {
+  @Transform(({ value }) => value.trim().toLowerCase())
+  email: string;
+
+  @Type(() => Date)
+  createdAt: Date; // Рядок ISO буде перетворено в екземпляр Date
+}
+```
+
+---
+
+## 4. Guards: Якщо на контролері висить Guard, чи спрацює Pipe у разі відмови доступу (коли Guard повернув `false`)? Чому?
+
+### 📌 Коротке резюме
+**НІ, Pipe НЕ спрацює.** Запит негайно зупиниться на етапі Guard, а Pipe взагалі не почне виконуватися.
+
+---
+
+### 🔍 Чому так відбувається?
+
+1. **Місце в життєвому циклі:**
+   Як визначено в NestJS Request Lifecycle:
+   $$\mathbf{Guards} \quad \xrightarrow{\text{успіх}} \quad \mathbf{Interceptors} \quad \xrightarrow{\text{успіх}} \quad \mathbf{Pipes}$$
+   Guards завжди стоять **перед** Pipes.
+
+2. **Механізм переривання:**
+   Коли Guard повертає `false` або викидає помилку (наприклад, `throw new UnauthorizedException()`):
+   - NestJS автоматично формує `ForbiddenException` (HTTP 403) або передає викинутий виняток.
+   - Запит **негайно випадає** з основного ланцюжка виконання прямо в шар `Exception Filters`.
+   - Жоден наступний крок (Interceptors, Pipes, сам метод контролера) **не викликається**.
+
+---
+
+### 🎯 Архітектурна доцільність: Чому це спроєктовано саме так?
+
+1. **Безпека (Security First):**
+   Неавторизований або підозрілий користувач не повинен змушувати бекенд виконувати зайві операції чи викликати бізнес-валідацію.
+2. **Оптимізація та захист від DoS (Performance & Resource Saving):**
+   Валідація DTO за допомогою `class-validator` — це ресурсномістка операція:
+   - Обхід глибоких вкладених об'єктів.
+   - Складні регулярні вирази (RegEx) для валідації полів.
+   - Можливі кастомні валідатори, що роблять запити до бази даних (наприклад, перевірка унікальності email).
+   
+   Виконувати такі обчислення для запиту, який не пройшов базову авторизацію або перевірку ролі — це пряма діра для DoS-атак та марна трата ресурсів CPU/RAM.
