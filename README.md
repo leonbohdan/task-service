@@ -11,13 +11,16 @@ task-service/
 ├── day_1.md              # День 1: Utility Types, Docker (Postgres), основи NestJS
 ├── day_2.md              # День 2: Життєвий цикл запиту (Pipes, Guards, Interceptors, Decorators)
 ├── day_3.md              # День 3: Реляційні БД, зв'язки (1:1, 1:N, N:M) та ORM-міграції
+├── day_4.md              # День 4: Індексація в SQL, оптимізація запитів та EXPLAIN ANALYZE
 ├── index.day_1.ts        # Розв'язок розігріву Дня 1 (агрегація подій користувачів)
 ├── index.day_2.ts        # Розв'язок розігріву Дня 2 (побудова дерева категорій Flat-to-Tree)
 ├── index.day_3.ts        # Розв'язок розігріву Дня 3 (симуляція INNER JOIN та LEFT JOIN за O(N+M))
+├── index.day_4.ts        # Розв'язок розігріву Дня 4 (композитний індекс: Hash Map + Binary Search)
 └── docs/                 # Теоретичні матеріали та відповіді на питання співбесід
     ├── day_1_answers.md  # Детальні відповіді на питання Дня 1
     ├── day_2_answers.md  # Детальні відповіді на питання Дня 2
-    └── day_3_answers.md  # Детальні відповіді на питання Дня 3
+    ├── day_3_answers.md  # Детальні відповіді на питання Дня 3
+    └── day_4_answers.md  # Детальні відповіді на питання Дня 4
 ```
 
 ---
@@ -42,6 +45,12 @@ task-service/
 * **Міграції та Seeding:** Створення та накатка міграцій, foreign keys, `ON DELETE CASCADE/RESTRICT`, генерація тестових даних.
 * **Теорія та співбесіда:** Розбір проблеми N+1, фіксація ціни в `OrderItem`, стратегії `ON DELETE`, Eager vs Lazy Loading у Node.js ([docs/day_3_answers.md](./docs/day_3_answers.md)).
 
+### [День 4: Індексація в SQL, оптимізація запитів та EXPLAIN ANALYZE](./day_4.md)
+* **Алгоритмічний розігрів:** Власний композитний індекс у пам'яті (`ProductIndex`) з хешуванням `category:inStock` ($O(1)$) та бінарним пошуком за діапазоном цін `price` ($O(\log K)$) проти лінійного пошуку ($O(N)$) ([index.day_4.ts](./index.day_4.ts)).
+* **Аналіз запитів у PostgreSQL:** Генерація 200,000+ записів, дослідження `EXPLAIN (ANALYZE, BUFFERS)`, порівняння `Seq Scan`, `Index Scan`, `Bitmap Index Scan`.
+* **Проєктування індексів:** Складені B-Tree індекси, перевірка правила лівого префікса (Leftmost Prefix Rule), часткові індекси (Partial Indexes) для оптимізації черг замовлень.
+* **Теорія та співбесіда:** Внутрішня будова $B^+$ Tree, порівняння типів сканування (`Index Scan` vs `Bitmap Index Scan` vs `Index Only Scan`), компроміси та ціна надлишкової індексації (Write penalty, Bloat, HOT updates) ([docs/day_4_answers.md](./docs/day_4_answers.md)).
+
 ---
 
 ## 🛠️ Запуск алгоритмічних завдань
@@ -57,6 +66,9 @@ npx tsx index.day_2.ts
 
 # Запуск розігріву Дня 3
 npx tsx index.day_3.ts
+
+# Запуск розігріву Дня 4
+npx tsx index.day_4.ts
 ```
 
 ---
