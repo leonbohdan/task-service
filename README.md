@@ -22,12 +22,13 @@ task-service/
     │   ├── p-1_d-4.md        # Завдання Дня 4 (Project 1 Day 4)
     │   ├── p-1_d-5.md        # Завдання Дня 5 (Project 1 Day 5)
     │   └── p-2_d-6.md        # Завдання Дня 6 (Project 1 Day 6)
-    └── answers/              # Детальні відповіді (Project 1)
+    └── answers/              # Детальні відповіді
         ├── p-1_d-1.md        # Відповіді Дня 1 (Project 1 Day 1 Answers)
         ├── p-1_d-2.md        # Відповіді Дня 2 (Project 1 Day 2 Answers)
         ├── p-1_d-3.md        # Відповіді Дня 3 (Project 1 Day 3 Answers)
         ├── p-1_d-4.md        # Відповіді Дня 4 (Project 1 Day 4 Answers)
-        └── p-1_d-5.md        # Відповіді Дня 5 (Project 1 Day 5 Answers)
+        ├── p-1_d-5.md        # Відповіді Дня 5 (Project 1 Day 5 Answers)
+        └── p-2_d-6.md        # Відповіді Дня 6 (Project 2 Day 6 Answers)
 ```
 
 ---
@@ -63,8 +64,9 @@ task-service/
 * **Транзакції та блокування:** Рівні ізоляції транзакцій у PostgreSQL, аномалії паралельного доступу (Dirty Read, Non-repeatable Read, Phantom Read, Serialization Anomaly).
 * **Теорія та співбесіда:** Pessimistic vs Optimistic Locking, патерн `runExclusive`, взаємні блокування (Deadlocks) ([docs/answers/p-1_d-5.md](./docs/answers/p-1_d-5.md)).
 
-### [День 6](./docs/tasks/p-2_d-6.md)
-* **Алгоритмічний розігрів:** ([index.day_6.ts](./index.day_6.ts)).
+### [День 6: InsightPulse — MongoDB Aggregation Pipeline (Основи) та Docker для NoSQL](./docs/tasks/p-2_d-6.md)
+* **Алгоритмічний розігрів:** Власний багатовимірний агрегатор масиву об'єктів з розрахунком метрик (`aggregateSales`) за $O(N)$ ([index.day_6.ts](./index.day_6.ts)).
+* **Теорія та співбесіда:** Pipeline-модель обробки, індекси у конвеєрі, системні ліміти RAM (100 МБ) та `allowDiskUse`, `$project` vs `$addFields` ([docs/answers/p-2_d-6.md](./docs/answers/p-2_d-6.md)).
 
 ---
 
