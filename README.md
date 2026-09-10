@@ -13,22 +13,15 @@ task-service/
 ├── index.day_3.ts        # Розв'язок розігріву Дня 3 (симуляція INNER JOIN та LEFT JOIN за O(N+M))
 ├── index.day_4.ts        # Розв'язок розігріву Дня 4 (композитний індекс: Hash Map + Binary Search)
 ├── index.day_5.ts        # Розв'язок розігріву Дня 5 (Mutex та усунення Race Condition)
-├── index.day_6.ts        # Розв'язок розігріву Дня 6
+├── index.day_6.ts        # Розв'язок розігріву Дня 6 (багатовимірний агрегатор масиву)
+├── index.day_7.ts        # Розв'язок розігріву Дня 7 (розгортання масивів unwind)
+├── index.day_8.ts        # Розв'язок розігріву Дня 8 (Field Masking у GraphQL)
 └── docs/                 # Теоретичні матеріали, завдання та відповіді на питання співбесід
-    ├── tasks/                # Щоденні завдання (Project 1)
-    │   ├── p-1_d-1.md        # Завдання Дня 1 (Project 1 Day 1)
-    │   ├── p-1_d-2.md        # Завдання Дня 2 (Project 1 Day 2)
-    │   ├── p-1_d-3.md        # Завдання Дня 3 (Project 1 Day 3)
-    │   ├── p-1_d-4.md        # Завдання Дня 4 (Project 1 Day 4)
-    │   ├── p-1_d-5.md        # Завдання Дня 5 (Project 1 Day 5)
-    │   └── p-2_d-6.md        # Завдання Дня 6 (Project 1 Day 6)
-    └── answers/              # Детальні відповіді
-        ├── p-1_d-1.md        # Відповіді Дня 1 (Project 1 Day 1 Answers)
-        ├── p-1_d-2.md        # Відповіді Дня 2 (Project 1 Day 2 Answers)
-        ├── p-1_d-3.md        # Відповіді Дня 3 (Project 1 Day 3 Answers)
-        ├── p-1_d-4.md        # Відповіді Дня 4 (Project 1 Day 4 Answers)
-        ├── p-1_d-5.md        # Відповіді Дня 5 (Project 1 Day 5 Answers)
-        └── p-2_d-6.md        # Відповіді Дня 6 (Project 2 Day 6 Answers)
+    ├── tasks/                # Щоденні завдання
+    │   ├── p-1_d-1.md ... p-1_d-5.md  # Завдання Проєкту 1 (Дні 1–5)
+    │   ├── p-2_d-1.md ... p-2_d-4.md  # Завдання Проєкту 2 (Дні 6–9)
+    │   └── p-3_d-1.md ... p-3_d-4.md  # Завдання Проєкту 3 (Дні 10–13)
+    └── answers/              # Детальні відповіді на питання та розбори
 ```
 
 ---
@@ -64,9 +57,45 @@ task-service/
 * **Транзакції та блокування:** Рівні ізоляції транзакцій у PostgreSQL, аномалії паралельного доступу (Dirty Read, Non-repeatable Read, Phantom Read, Serialization Anomaly).
 * **Теорія та співбесіда:** Pessimistic vs Optimistic Locking, патерн `runExclusive`, взаємні блокування (Deadlocks) ([docs/answers/p-1_d-5.md](./docs/answers/p-1_d-5.md)).
 
-### [День 6: InsightPulse — MongoDB Aggregation Pipeline (Основи) та Docker для NoSQL](./docs/tasks/p-2_d-6.md)
+### [День 6: InsightPulse — MongoDB Aggregation Pipeline (Основи) та Docker для NoSQL](./docs/tasks/p-2_d-1.md)
 * **Алгоритмічний розігрів:** Власний багатовимірний агрегатор масиву об'єктів з розрахунком метрик (`aggregateSales`) за $O(N)$ ([index.day_6.ts](./index.day_6.ts)).
-* **Теорія та співбесіда:** Pipeline-модель обробки, індекси у конвеєрі, системні ліміти RAM (100 МБ) та `allowDiskUse`, `$project` vs `$addFields` ([docs/answers/p-2_d-6.md](./docs/answers/p-2_d-6.md)).
+* **NoSQL інфраструктура:** Docker Compose для MongoDB 7.0 та Mongo Express, аналітичний модуль на базі `@nestjs/mongoose`.
+* **Теорія та співбесіда:** Pipeline-модель обробки, індекси у конвеєрі, системні ліміти RAM (100 МБ) та `allowDiskUse`, `$project` vs `$addFields` ([docs/answers/p-2_d-1.md](./docs/answers/p-2_d-1.md)).
+
+### [День 7: InsightPulse — Складні агрегації, джоїни ($lookup) та $facet](./docs/tasks/p-2_d-2.md)
+* **Алгоритмічний розігрів:** Універсальна generic-утиліта `unwind` для розгортання вкладених масивів у плаский список об'єктів ([index.day_7.ts](./index.day_7.ts)).
+* **Реляційні джоїни у NoSQL:** Корельовані підзапити через `$lookup`, `$unwind` з `preserveNullAndEmptyArrays`.
+* **Мульти-аналітика:** Побудова комплексного бізнес-дашборду за один запит через `$facet` та `$bucket` ([docs/answers/p-2_d-2.md](./docs/answers/p-2_d-2.md)).
+
+### [День 8: InsightPulse — GraphQL API в NestJS з Apollo Server (Code-First)](./docs/tasks/p-2_d-3.md)
+* **Алгоритмічний розігрів:** Селектор полів (Field Masking & Projection) у пам'яті за графом вибірки ([index.day_8.ts](./index.day_8.ts)).
+* **Code-First GraphQL:** Підключення Apollo Server до NestJS, декоратори `@ObjectType`, `@InputType`, `@Query`, `@Mutation`.
+* **Теорія та співбесіда:** GraphQL vs REST, Over/Under-fetching, специфіка кешування та статус-коди ([docs/answers/p-2_d-3.md](./docs/answers/p-2_d-3.md)).
+
+### [День 9: InsightPulse — Вирішення N+1 у GraphQL (DataLoader) та захист API](./docs/tasks/p-2_d-4.md)
+* **Алгоритмічний розігрів:** Власний пакетний кешер `BatchLoader<K, V>` на черзі мікротасків Event Loop.
+* **Оптимізація та N+1:** Впровадження `dataloader` у NestJS, per-request context фабрика, усунення множинних запитів до MongoDB.
+* **Безпека API:** Захист від DoS через Query Depth Limiting, Query Complexity Analysis та Rate Limiting з `@nestjs/throttler`.
+
+### [День 10: Event-Driven — Docker Compose Network та Мікросервісна архітектура](./docs/tasks/p-3_d-1.md)
+* **Алгоритмічний розігрів:** Патерн `Retry with Exponential Backoff and Full Jitter` для стійких міжсервісних викликів.
+* **Інфраструктура:** Об'єднання `order-service`, `analytics-service` та `notification-service` у мережу `microservices_net`.
+* **Теорія та співбесіда:** Лавиноподібні відмови (Cascading Failures), теорема CAP, патерн Saga (Orchestration vs Choreography).
+
+### [День 11: Event-Driven — Черги повідомлень з RabbitMQ (AMQP)](./docs/tasks/p-3_d-2.md)
+* **Алгоритмічний розігрів:** Пріоритетна черга (`PriorityQueue`) на основі бінарної купи (Binary Min-Heap) за $O(\log N)$.
+* **AMQP брокер:** Розгортання RabbitMQ з Management UI, підключення `@nestjs/microservices`.
+* **Надійність доставки:** Ручні підтвердження (`ACK`/`NACK`), обробка збоїв через Dead Letter Queue (DLQ), `prefetch_count` (Backpressure).
+
+### [День 12: Event-Driven — Apache Kafka: Стрімінг подій, топіки та партиції](./docs/tasks/p-3_d-3.md)
+* **Алгоритмічний розігрів:** Кільцевий буфер (`CircularBuffer`) фіксованої місткості у пам'яті за $O(1)$ без зсуву масиву.
+* **Стрімінг подій:** Запуск кластера Apache Kafka у режимі KRaft (без ZooKeeper) та Kafka UI у Docker.
+* **Паралелізм і порядок:** Топіки, збереження порядку за Partition Key, Consumer Groups та балансування споживачів.
+
+### [День 13: Event-Driven — Надійність розподілених систем (Outbox Pattern & Idempotency)](./docs/tasks/p-3_d-4.md)
+* **Алгоритмічний розігрів:** Менеджер ідемпотентності (`IdempotencyManager`) з детермінованим хешуванням корисного навантаження (SHA-256).
+* **Dual-Write Problem:** Атомарна транзакція БД та таблиця `outbox_events` у PostgreSQL.
+* **Воркер публікації:** Реалізація `OutboxProcessor` з конкурентним блокуванням рядків `FOR UPDATE SKIP LOCKED`.
 
 ---
 
