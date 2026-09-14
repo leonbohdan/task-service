@@ -16,6 +16,10 @@ task-service/
 ├── index.day_6.ts        # Розв'язок розігріву Дня 6 (багатовимірний агрегатор масиву)
 ├── index.day_7.ts        # Розв'язок розігріву Дня 7 (розгортання масивів unwind)
 ├── index.day_8.ts        # Розв'язок розігріву Дня 8 (Field Masking у GraphQL)
+├── index.day_9.ts        # Розв'язок розігріву Дня 9 (BatchLoader на черзі мікротасків Event Loop)
+├── index.day_10.ts       # Розв'язок розігріву Дня 10 (Retry з Exponential Backoff та Full Jitter)
+├── index.day_11.ts       # Розв'язок розігріву Дня 11 (Priority Queue на базі Binary Min-Heap)
+├── index.day_12.ts       # Розв'язок розігріву Дня 12 (Circular / Ring Buffer у пам'яті за O(1))
 └── docs/                 # Теоретичні матеріали, завдання та відповіді на питання співбесід
     ├── tasks/                # Щоденні завдання
     │   ├── p-1_d-1.md ... p-1_d-5.md  # Завдання Проєкту 1 (Дні 1–5)
@@ -73,24 +77,27 @@ task-service/
 * **Теорія та співбесіда:** GraphQL vs REST, Over/Under-fetching, специфіка кешування та статус-коди ([docs/answers/p-2_d-3.md](./docs/answers/p-2_d-3.md)).
 
 ### [День 9: InsightPulse — Вирішення N+1 у GraphQL (DataLoader) та захист API](./docs/tasks/p-2_d-4.md)
-* **Алгоритмічний розігрів:** Власний пакетний кешер `BatchLoader<K, V>` на черзі мікротасків Event Loop.
+* **Алгоритмічний розігрів:** Власний пакетний кешер `BatchLoader<K, V>` на черзі мікротасків Event Loop ([index.day_9.ts](./index.day_9.ts)).
 * **Оптимізація та N+1:** Впровадження `dataloader` у NestJS, per-request context фабрика, усунення множинних запитів до MongoDB.
 * **Безпека API:** Захист від DoS через Query Depth Limiting, Query Complexity Analysis та Rate Limiting з `@nestjs/throttler`.
+* **Теорія та співбесіда:** Механізм черги мікротасків, per-request кешування vs глобальний кеш ([docs/answers/p-2_d-4.md](./docs/answers/p-2_d-4.md)).
 
 ### [День 10: Event-Driven — Docker Compose Network та Мікросервісна архітектура](./docs/tasks/p-3_d-1.md)
-* **Алгоритмічний розігрів:** Патерн `Retry with Exponential Backoff and Full Jitter` для стійких міжсервісних викликів.
+* **Алгоритмічний розігрів:** Патерн `Retry with Exponential Backoff and Full Jitter` для стійких міжсервісних викликів ([index.day_10.ts](./index.day_10.ts)).
 * **Інфраструктура:** Об'єднання `order-service`, `analytics-service` та `notification-service` у мережу `microservices_net`.
-* **Теорія та співбесіда:** Лавиноподібні відмови (Cascading Failures), теорема CAP, патерн Saga (Orchestration vs Choreography).
+* **Теорія та співбесіда:** Лавиноподібні відмови (Cascading Failures), теорема CAP, патерн Saga (Orchestration vs Choreography) ([docs/answers/p-3_d-1.md](./docs/answers/p-3_d-1.md)).
 
 ### [День 11: Event-Driven — Черги повідомлень з RabbitMQ (AMQP)](./docs/tasks/p-3_d-2.md)
-* **Алгоритмічний розігрів:** Пріоритетна черга (`PriorityQueue`) на основі бінарної купи (Binary Min-Heap) за $O(\log N)$.
+* **Алгоритмічний розігрів:** Пріоритетна черга (`PriorityQueue`) на основі бінарної купи (Binary Min-Heap) за $O(\log N)$ ([index.day_11.ts](./index.day_11.ts)).
 * **AMQP брокер:** Розгортання RabbitMQ з Management UI, підключення `@nestjs/microservices`.
 * **Надійність доставки:** Ручні підтвердження (`ACK`/`NACK`), обробка збоїв через Dead Letter Queue (DLQ), `prefetch_count` (Backpressure).
+* **Теорія та співбесіда:** Competing Consumers, Poison Messages та нескінченні цикли, типи обмінників (Direct, Fanout, Topic) ([docs/answers/p-3_d-2.md](./docs/answers/p-3_d-2.md)).
 
 ### [День 12: Event-Driven — Apache Kafka: Стрімінг подій, топіки та партиції](./docs/tasks/p-3_d-3.md)
-* **Алгоритмічний розігрів:** Кільцевий буфер (`CircularBuffer`) фіксованої місткості у пам'яті за $O(1)$ без зсуву масиву.
+* **Алгоритмічний розігрів:** Кільцевий буфер (`CircularBuffer`) фіксованої місткості у пам'яті за $O(1)$ без зсуву масиву ([index.day_12.ts](./index.day_12.ts)).
 * **Стрімінг подій:** Запуск кластера Apache Kafka у режимі KRaft (без ZooKeeper) та Kafka UI у Docker.
 * **Паралелізм і порядок:** Топіки, збереження порядку за Partition Key, Consumer Groups та балансування споживачів.
+* **Теорія та співбесіда:** Pull vs Push (Kafka vs RabbitMQ), Retention Log, гарантія порядку за Partition Key, усунення Rebalance Storm (Cooperative Sticky Assignor) ([docs/answers/p-3_d-3.md](./docs/answers/p-3_d-3.md)).
 
 ### [День 13: Event-Driven — Надійність розподілених систем (Outbox Pattern & Idempotency)](./docs/tasks/p-3_d-4.md)
 * **Алгоритмічний розігрів:** Менеджер ідемпотентності (`IdempotencyManager`) з детермінованим хешуванням корисного навантаження (SHA-256).
