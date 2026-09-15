@@ -20,6 +20,7 @@ task-service/
 ├── index.day_10.ts       # Розв'язок розігріву Дня 10 (Retry з Exponential Backoff та Full Jitter)
 ├── index.day_11.ts       # Розв'язок розігріву Дня 11 (Priority Queue на базі Binary Min-Heap)
 ├── index.day_12.ts       # Розв'язок розігріву Дня 12 (Circular / Ring Buffer у пам'яті за O(1))
+├── index.day_13.ts       # Розв'язок розігріву Дня 13 (IdempotencyManager з детермінованим SHA-256 хешуванням)
 └── docs/                 # Теоретичні матеріали, завдання та відповіді на питання співбесід
     ├── tasks/                # Щоденні завдання
     │   ├── p-1_d-1.md ... p-1_d-5.md  # Завдання Проєкту 1 (Дні 1–5)
@@ -100,9 +101,10 @@ task-service/
 * **Теорія та співбесіда:** Pull vs Push (Kafka vs RabbitMQ), Retention Log, гарантія порядку за Partition Key, усунення Rebalance Storm (Cooperative Sticky Assignor) ([docs/answers/p-3_d-3.md](./docs/answers/p-3_d-3.md)).
 
 ### [День 13: Event-Driven — Надійність розподілених систем (Outbox Pattern & Idempotency)](./docs/tasks/p-3_d-4.md)
-* **Алгоритмічний розігрів:** Менеджер ідемпотентності (`IdempotencyManager`) з детермінованим хешуванням корисного навантаження (SHA-256).
+* **Алгоритмічний розігрів:** Менеджер ідемпотентності (`IdempotencyManager`) з детермінованим хешуванням корисного навантаження (SHA-256) ([index.day_13.ts](./index.day_13.ts)).
 * **Dual-Write Problem:** Атомарна транзакція БД та таблиця `outbox_events` у PostgreSQL.
 * **Воркер публікації:** Реалізація `OutboxProcessor` з конкурентним блокуванням рядків `FOR UPDATE SKIP LOCKED`.
+* **Теорія та співбесіда:** Гарантії доставки At-least-once, Idempotent Consumer, Polling Outbox проти CDC (Debezium WAL), механіка `FOR UPDATE SKIP LOCKED`, ліквідація Table Bloat ([docs/answers/p-3_d-4.md](./docs/answers/p-3_d-4.md)).
 
 ---
 
@@ -111,7 +113,7 @@ task-service/
 Для швидкого виконання TypeScript файлів без попередньої компіляції використовуйте [tsx](https://github.com/privatenumber/tsx):
 
 ```bash
-# Запуск розігріву Дня N(1-15)
+# Запуск розігріву Дня N(1-13)
 npx tsx index.day_N.ts
 ```
 
